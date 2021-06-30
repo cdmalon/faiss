@@ -727,6 +727,97 @@ Index* read_index(const char* fname, int io_flags) {
     return idx;
 }
 
+IndexIVFPQ* read_ivfpq_index(IOReader* f, int io_flags) {
+    IndexIVFPQ* idx = nullptr;
+    uint32_t h;
+    READ1(h);
+    if (h == fourcc("IxFI") || h == fourcc("IxF2") || h == fourcc("IxFl")) {
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (h == fourcc("IxHE") || h == fourcc("IxHe")) {
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (
+            h == fourcc("IxPQ") || h == fourcc("IxPo") || h == fourcc("IxPq")) {
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (h == fourcc("IxRQ")) {
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (h == fourcc("ImRQ")) {
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (h == fourcc("IvFl") || h == fourcc("IvFL")) { // legacy
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (h == fourcc("IwFd")) {
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (h == fourcc("IwFl")) {
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (h == fourcc("IxSQ")) {
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (h == fourcc("IxLa")) {
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (h == fourcc("IvSQ")) { // legacy
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (h == fourcc("IwSQ") || h == fourcc("IwSq")) {
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (h == fourcc("IwSh")) {
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (
+            h == fourcc("IvPQ") || h == fourcc("IvQR") || h == fourcc("IwPQ") ||
+            h == fourcc("IwQR")) {
+        idx = read_ivfpq(f, h, io_flags);
+
+    } else if (h == fourcc("IxPT")) {
+        IndexPreTransform* ixpt = new IndexPreTransform();
+        ixpt->own_fields = true;
+        read_index_header(ixpt, f);
+        int nt;
+        if (read_old_fmt_hack == 2) {
+            nt = 1;
+        } else {
+            READ1(nt);
+        }
+        for (int i = 0; i < nt; i++) {
+            ixpt->chain.push_back(read_VectorTransform(f));
+        }
+        // ixpt->index = read_index(f, io_flags);
+        // idx = ixpt;
+        idx = read_ivfpq_index(f, io_flags);  // lose the pretransform!
+    } else if (h == fourcc("Imiq")) {
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (h == fourcc("IxRF")) {
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (h == fourcc("IxMp") || h == fourcc("IxM2")) {
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (h == fourcc("Ix2L")) {
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (
+            h == fourcc("IHNf") || h == fourcc("IHNp") || h == fourcc("IHNs") ||
+            h == fourcc("IHN2")) {
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (h == fourcc("INSf")) {
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (h == fourcc("IPfs")) {
+        FAISS_THROW_MSG("Unsupported index type");
+    } else if (h == fourcc("IwPf")) {
+        FAISS_THROW_MSG("Unsupported index type");
+    } else {
+        FAISS_THROW_FMT(
+                "Index type 0x%08x (\"%s\") not recognized",
+                h,
+                fourcc_inv_printable(h).c_str());
+        idx = nullptr;
+    }
+    return idx;
+}
+
+IndexIVFPQ* read_ivfpq_index(FILE* f, int io_flags) {
+    FileIOReader reader(f);
+    return read_ivfpq_index(&reader, io_flags);
+}
+
+IndexIVFPQ* read_ivfpq_index(const char* fname, int io_flags) {
+    FileIOReader reader(fname);
+    IndexIVFPQ* idx = read_ivfpq_index(&reader, io_flags);
+    return idx;
+}
+
 VectorTransform* read_VectorTransform(const char* fname) {
     FileIOReader reader(fname);
     VectorTransform* vt = read_VectorTransform(&reader);

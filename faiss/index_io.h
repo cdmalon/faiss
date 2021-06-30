@@ -28,6 +28,7 @@
 namespace faiss {
 
 struct Index;
+struct IndexIVFPQ;
 struct IndexBinary;
 struct VectorTransform;
 struct ProductQuantizer;
@@ -57,6 +58,10 @@ const int IO_FLAG_MMAP = IO_FLAG_SKIP_IVF_DATA | 0x646f0000;
 Index* read_index(const char* fname, int io_flags = 0);
 Index* read_index(FILE* f, int io_flags = 0);
 Index* read_index(IOReader* reader, int io_flags = 0);
+
+IndexIVFPQ* read_ivfpq_index(const char* fname, int io_flags = 0);
+IndexIVFPQ* read_ivfpq_index(FILE* f, int io_flags = 0);
+IndexIVFPQ* read_ivfpq_index(IOReader* reader, int io_flags = 0);
 
 IndexBinary* read_index_binary(const char* fname, int io_flags = 0);
 IndexBinary* read_index_binary(FILE* f, int io_flags = 0);

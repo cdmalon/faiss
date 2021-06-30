@@ -528,6 +528,7 @@ void gpu_sync_all_devices()
 #endif
 
 %newobject read_index;
+%newobject read_ivfpq_index;
 %newobject read_index_binary;
 %newobject read_VectorTransform;
 %newobject read_ProductQuantizer;
